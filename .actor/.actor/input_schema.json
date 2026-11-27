@@ -1,0 +1,30 @@
+{
+  "title": "PartSouq OEM Parts Scraper Input",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "partNumbers": {
+      "title": "Part Numbers",
+      "type": "array",
+      "description": "Enter OEM or aftermarket automotive part numbers to search on PartSouq.",
+      "editor": "stringList",
+      "default": ["90915-YZZD1", "04152-YZZA1"],
+      "prefill": ["90915-YZZD1", "04152-YZZA1"]
+    },
+    "includeCrossRef": {
+      "title": "Include Cross-Reference / Replacements",
+      "type": "boolean",
+      "description": "Return both exact OEM matches and compatible replacements.",
+      "default": true
+    },
+    "proxyConfiguration": {
+      "title": "Proxy Configuration",
+      "type": "object",
+      "description": "Residential proxies recommended for PartSouq.",
+      "editor": "proxy",
+      "default": { "useApifyProxy": true, "apifyProxyGroups": ["RESIDENTIAL"] },
+      "prefill": { "useApifyProxy": true, "apifyProxyGroups": ["RESIDENTIAL"] }
+    }
+  },
+  "required": ["partNumbers"]
+}
