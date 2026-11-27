@@ -1,0 +1,11 @@
+{
+  "actorOutputSchemaVersion": 1,
+  "title": "PartSouq OEM Parts Scraper Output",
+  "properties": {
+    "results": {
+      "type": "string",
+      "title": "Extracted Parts Dataset",
+      "template": "{{links.apiDefaultDatasetUrl}}/items"
+    }
+  }
+}
