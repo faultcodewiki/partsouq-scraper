@@ -1,0 +1,9 @@
+{
+  "actorSpecification": 1,
+  "name": "partsouq-oem-parts-scraper",
+  "title": "PartSouq OEM Auto Parts Price, Stock & Cross-Reference Scraper",
+  "description": "Extract OEM & aftermarket automotive parts pricing, real-time stock availability, lead time, origin (Made in), and cross-reference replacements from PartSouq by part number.",
+  "version": "0.1",
+  "input": "./input_schema.json",
+  "dockerfile": "../Dockerfile"
+}
