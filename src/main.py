@@ -13,10 +13,21 @@ def scrape_part(query: str, include_cross_ref: bool = True, proxy_url: str | Non
 
     url = f"https://partsouq.com/en/search/all?q={quote_plus(clean_q)}"
     proxies = {"http": proxy_url, "https": proxy_url} if proxy_url else None
+    headers = {
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Referer": "https://partsouq.com/",
+    }
 
-    res = requests.get(url, impersonate="chrome", proxies=proxies, timeout=30)
+    res = requests.get(
+        url,
+        impersonate="chrome124",
+        headers=headers,
+        proxies=proxies,
+        timeout=30,
+    )
     if res.status_code != 200:
-        Actor.log.warning(f"[{clean_q}] HTTP {res.status_code}")
+        Actor.log.warning(f"[{clean_q}] HTTP {res.status_code} (Proxy used: {bool(proxy_url)})")
         return []
 
     title_map = {}
@@ -84,17 +95,25 @@ async def main() -> None:
         part_numbers = actor_input.get("partNumbers") or ["90915-YZZD1"]
         include_cross_ref = actor_input.get("includeCrossRef", True)
 
-        proxy_url = None
+        # 프록시 설정 (기본값: RESIDENTIAL 자동 적용, 실패 시 일반 프록시 폴백)
         proxy_cfg = actor_input.get("proxyConfiguration")
-        if proxy_cfg:
-            proxy_info = await Actor.create_proxy_configuration(actor_proxy_input=proxy_cfg)
-            if proxy_info:
-                proxy_url = await proxy_info.new_url()
+        proxy_info = None
+        try:
+            if proxy_cfg:
+                proxy_info = await Actor.create_proxy_configuration(actor_proxy_input=proxy_cfg)
+            else:
+                proxy_info = await Actor.create_proxy_configuration(groups=["RESIDENTIAL"])
+        except Exception:
+            try:
+                proxy_info = await Actor.create_proxy_configuration()
+            except Exception as e:
+                Actor.log.warning(f"Proxy init skipped: {e}")
 
         total_saved = 0
         for idx, pn in enumerate(part_numbers, 1):
             Actor.log.info(f"[{idx}/{len(part_numbers)}] Searching: {pn}")
             try:
+                proxy_url = await proxy_info.new_url() if proxy_info else None
                 items = await asyncio.to_thread(scrape_part, pn, include_cross_ref, proxy_url)
                 if items:
                     await Actor.push_data(items)
@@ -106,6 +125,6 @@ async def main() -> None:
                 Actor.log.error(f"[{pn}] Error: {e}")
 
             if idx < len(part_numbers):
-                await asyncio.sleep(1.2)
+                await asyncio.sleep(1.5)
 
         Actor.log.info(f"Done! Total {total_saved} parts extracted.")
